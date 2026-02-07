@@ -1,11 +1,10 @@
-import { formatEther } from "ethers";
+import { Wallet, formatEther } from "ethers";
 
-export async function getNativeBalance(wallet) {
+export async function getNativeBalance(wallet: Wallet): Promise<string> {
     try {
-        const raw = await wallet.provider.getBalance(wallet.address);
+        const raw = await wallet.provider!.getBalance(wallet.address);
         return formatEther(raw);
-    } catch (err) {
-        console.warn("Native balance unavailable");
+    } catch {
         return "0";
     }
 }

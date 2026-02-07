@@ -1,31 +1,26 @@
-import { Contract, parseEther, parseUnits } from "ethers";
-import { TOKENS } from "@/lib/tokens";
+import { Wallet, parseEther, Contract, parseUnits } from "ethers";
 
 const ERC20_ABI = ["function transfer(address to, uint256 amount)"];
 
-export async function sendNative(wallet, to: string, amount: string) {
-    const tx = await wallet.sendTransaction({
-        to,
-        value: parseEther(amount),
-    });
-
-    return tx.wait();
-}
-
-export async function sendVLT(
-    wallet,
-    chain: "ETH" | "BSC",
+export async function sendNative(
+    wallet: Wallet,
     to: string,
     amount: string
 ) {
-    const token = TOKENS.VLT[chain];
-    if (!token) throw new Error("VLT not available on this chain");
-
-    const contract = new Contract(token.address, ERC20_ABI, wallet);
-    const tx = await contract.transfer(
+    return wallet.sendTransaction({
         to,
-        parseUnits(amount, token.decimals)
-    );
+        value: parseEther(amount),
+    });
+}
 
-    return tx.wait();
+export async function sendVLT(
+    wallet: Wallet,
+    to: string,              // ← FIX: add `to`
+    tokenAddress: string,
+    amount: string,
+    decimals = 18
+) {
+    const contract = new Contract(tokenAddress, ERC20_ABI, wallet);
+    const value = parseUnits(amount, decimals);
+    return contract.transfer(to, value);
 }
